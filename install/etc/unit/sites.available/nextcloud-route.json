@@ -1,0 +1,92 @@
+[
+    {
+      "match": {
+        "uri": [
+          "/.well-known/carddav",
+          "/.well-known/caldav"
+        ]
+      },
+      "action": {
+        "return": 301,
+        "location": "/remote.php/dav"
+      }
+    },
+    {
+      "match": {
+        "uri": [
+          "/.well-known/*"
+        ]
+      },
+      "action": {
+        "pass": "applications/nextcloud/index"
+      }
+    },
+    {
+      "match": {
+        "uri": [
+          "/build/*",
+          "/tests/*",
+          "/config/*",
+          "/lib/*",
+          "/3rdparty/*",
+          "/templates/*",
+          "/data/*",
+          "/.*",
+          "/autotest*",
+          "/occ*",
+          "/issue*",
+          "/indie*",
+          "/db_*",
+          "/console*"
+        ]
+      },
+      "action": {
+        "return": 404
+      }
+    },
+    {
+      "match": {
+        "uri": [
+          "/core/ajax/update.php*",
+          "/cron.php*",
+          "/ocs-provider*.php*",
+          "/ocs/v1.php*",
+          "/ocs/v2.php*",
+          "/public.php*",
+          "/remote.php*",
+          "/status.php*",
+          "/updater*.php*"
+        ]
+      },
+      "action": {
+        "pass": "applications/nextcloud/direct"
+      }
+    },
+    {
+      "match": {
+        "uri": "/ocs-provider*"
+      },
+      "action": {
+        "pass": "applications/nextcloud/ocs"
+      }
+    },
+    {
+      "match": {
+        "uri": [
+          "/index.php",
+          "index.php/*"
+        ]
+      },
+      "action": {
+        "pass": "applications/nextcloud/index"
+      }
+    },
+    {
+      "action": {
+        "share": "{{UNIT_WEBROOT}}$uri",
+        "fallback": {
+          "pass": "applications/nextcloud/index"
+        }
+      }
+    }
+]

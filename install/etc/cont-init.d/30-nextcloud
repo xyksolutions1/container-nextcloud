@@ -4,7 +4,7 @@ source /assets/functions/00-container
 prepare_service
 PROCESS_NAME="nextcloud"
 
-check_service_initialized init 20-php-fpm
+check_service_initialized init 10-unit
 
 transform_file_var \
                         ADMIN_PASS \
@@ -23,7 +23,7 @@ if var_true "${CONTAINER_ENABLE_FIREWALL}" && var_true "${CONTAINER_ENABLE_FAIL2
 install_nextcloud
 create_configuration
 configure_application_settings
-custom_files "${CONTAINER_CUSTOM_PATH}" "${NGINX_WEBROOT}" "${NGINX_USER}" "${NGINX_GROUP}"
+custom_files "${CONTAINER_CUSTOM_PATH}" "${UNIT_WEBROOT}" "${UNIT_USER}" "${UNIT_GROUP}"
 custom_scripts
 
 print_info "Nextcloud Version ${NEXTCLOUD_VERSION} ready to be accessed!"

@@ -1,26 +1,26 @@
 ARG PHP_BASE=8.2
 ARG DISTRO="alpine"
 
-FROM docker.io/tiredofit/nginx-php-fpm:${PHP_BASE}-${DISTRO}
+FROM docker.io/tiredofit/unit-php:${PHP_BASE}-${DISTRO}
 LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
 ARG NEXTCLOUD_VERSION
 ARG NEXTCLOUD_FILES_BACKEND_VERSION
 
-ENV NEXTCLOUD_VERSION=${NEXTCLOUD_VERSION:-"27.1.1"} \
+ENV NEXTCLOUD_VERSION=${NEXTCLOUD_VERSION:-"27.1.2"} \
     NEXTCLOUD_FILES_BACKEND_VERSION=${NEXTCLOUD_FILES_BACKEND_VERSION:-"v0.6.3"} \
     NEXTCLOUD_FILES_BACKEND_REPO_URL=${NEXTCLOUD_FILES_BACKEND_REPO_URL:-"https://github.com/nextcloud/notify_push"} \
     DLIB_VERSION=v19.24 \
     DLIB_REPO_URL=https://github.com/davisking/dlib \
     PDLIB_VERSION=v1.1.0 \
     PDLIB_REPO_URL=https://github.com/goodspb/pdlib \
-    NGINX_CLIENT_BODY_TIMEOUT=600 \
-    NGINX_CLIENT_BODY_BUFFER_SIZE=512k \
-    NGINX_FASTCGI_BUFFERS="64 4k" \
-    NGINX_KEEP_ALIVE_TIMEOUT=600 \
-    NGINX_SEND_TIMEOUT=600 \
-    NGINX_SITE_ENABLED=nextcloud \
-    NGINX_WEBROOT="/www/nextcloud" \
+    UNIT_CLIENT_BODY_TIMEOUT=600 \
+    UNIT_CLIENT_BODY_BUFFER_SIZE=512k \
+    UNIT_FASTCGI_BUFFERS="64 4k" \
+    UNIT_KEEP_ALIVE_TIMEOUT=600 \
+    UNIT_SEND_TIMEOUT=600 \
+    UNIT_SITE_ENABLED=nextcloud \
+    UNIT_WEBROOT="/www/nextcloud" \
     PHP_ENABLE_CREATE_SAMPLE_PHP=FALSE \
     PHP_ENABLE_BCMATH=TRUE \
     PHP_ENABLE_EXIF=TRUE \
@@ -126,7 +126,7 @@ RUN source /assets/functions/00-container && \
     mkdir -p /assets/nextcloud/custom-apps && \
     curl -sSL https://download.nextcloud.com/server/releases/nextcloud-${NEXTCLOUD_VERSION}.tar.bz2 | tar xvfj - --strip 1 -C /assets/nextcloud && \
     #curl -sSL https://download.nextcloud.com/server/prereleases/nextcloud-${NEXTCLOUD_VERSION}.tar.bz2 | tar xvfj - --strip 1 -C /assets/nextcloud && \
-    chown -R nginx:www-data /assets/nextcloud && \
+    chown -R ${UNIT_USER}:${UNIT_GROUP} /assets/nextcloud && \
     \
     mkdir -p /opt/nextcloud_files_backend/bin/x86_64 && \
     curl -sSL "${NEXTCLOUD_FILES_BACKEND_REPO_URL}"/releases/download/${NEXTCLOUD_FILES_BACKEND_VERSION}/notify_push-x86_64-unknown-linux-musl -o /opt/nextcloud_files_backend/bin/x86_64/notify_push && \
@@ -135,7 +135,7 @@ RUN source /assets/functions/00-container && \
     mkdir -p /opt/nextcloud_files_backend/bin/aarch64 && \
     curl -sSL "${NEXTCLOUD_FILES_BACKEND_REPO_URL}"/releases/download/${NEXTCLOUD_FILES_BACKEND_VERSION}/notify_push-aarch64-unknown-linux-musl  -o /opt/nextcloud_files_backend/bin/aarch64/notify_push && \
     chmod +x /opt/nextcloud_files_backend/bin/*/notify_push && \
-    chown -R ${NGINX_USER}:${NGINX_GROUP} /opt/nextcloud_files_backend && \
+    chown -R ${UNIT_USER}:${UNIT_GROUP} /opt/nextcloud_files_backend && \
     \
     mkdir -p /data/userdata && \
     touch /data/userdata/audit.log && \

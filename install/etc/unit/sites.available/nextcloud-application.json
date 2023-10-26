@@ -1,0 +1,20 @@
+{
+    "nextcloud": {
+        "type": "php",
+        "user": "www-data",
+        "processes": {},
+        "targets": {
+          "direct": {
+            "root": "{{UNIT_WEBROOT}}/"
+          },
+          "index": {
+            "root": "{{UNIT_WEBROOT}}/",
+            "script": "index.php"
+          },
+          "ocs": {
+            "root": "{{UNIT_WEBROOT}}/ocs-provider/",
+            "script": "index.php"
+          }
+        }
+    }
+}
