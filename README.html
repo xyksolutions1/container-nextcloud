@@ -481,8 +481,10 @@ href="https://docs.nextcloud.com/server/21/admin_manual/issues/general_troublesh
 <h3 id="shell-access">Shell Access</h3>
 <p>For debugging and maintenance purposes you may want access the
 containers shell.</p>
-<p><code>bash docker exec -it (whatever your container name is) bash</code>
-## Support</p>
+<p><code>bash docker exec -it (whatever your container name is) bash</code></p>
+<p>or, if you wish to do something with nextcloud php occ: </p>
+<p><code>bash docker compose exec --user nginx (whatever your container name is) bash</code></p>
+## Support
 <p>These images were built to serve a specific need in a production
 environment and gradually have had more functionality added based on
 requests from the community. ### Usage - The <a
