@@ -1,3 +1,9 @@
+## 30-3.6.66 2024-11-07 <dave at tiredofit dot ca>
+
+   ### Added
+      - Nextcloud 30.0.2
+
+
 ## 30-3.6.65 2024-10-17 <dave at tiredofit dot ca>
 
    ### Added
