@@ -1,3 +1,9 @@
+## 31-3.6.76 2025-02-07 <dave at tiredofit dot ca>
+
+   ### Added
+      - Notify Push Plugin 1.0.0
+
+
 ## 31-3.6.75 2025-02-06 <dave at tiredofit dot ca>
 
    ### Added
