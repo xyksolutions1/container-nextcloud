@@ -1,3 +1,9 @@
+## 31-3.6.79 2025-02-25 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Update nginx configuration to better match upstream
+
+
 ## 31-3.6.78 2025-02-25 <dave at tiredofit dot ca>
 
    ### Added
