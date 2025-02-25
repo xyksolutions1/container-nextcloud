@@ -1,3 +1,9 @@
+## 31-3.6.81 2025-02-25 <fermion2020@github>
+
+   ### Changed
+      - Fix incorrect comparisons in version_greater function
+
+
 ## 31-3.6.80 2025-02-25 <fermion2020@github>
 
    ### Changed
