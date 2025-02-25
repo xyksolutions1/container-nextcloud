@@ -386,8 +386,9 @@ directory_empty() {
 
 version_greater() {
     # version_greater A B returns whether A > B
-    ver1_main=${1%-*}
-    ver2_main=${2%-*}
+    ver1_main=$(echo "$1" | grep -o '^[0-9.]*')
+    ver2_main=$(echo "$2" | grep -o '^[0-9.]*')
+
     ver1_pre=${1#"$ver1_main"}
     ver2_pre=${2#"$ver2_main"}
 
@@ -397,7 +398,7 @@ version_greater() {
     else
         # If one version has a pre-release part and the other doesn't, consider the one without pre-release greater
         if [ -z "$ver1_pre" ] && [ -n "$ver2_pre" ]; then
-            return 0
+            return 0  # Stable version > Pre-release version
         elif [ -n "$ver1_pre" ] && [ -z "$ver2_pre" ]; then
             return 1
         else
