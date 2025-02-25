@@ -1,3 +1,9 @@
+## 31-3.6.80 2025-02-25 <fermion2020@github>
+
+   ### Changed
+      - Change version check internal routines to allow proper upgrade from rc-> gold
+
+
 ## 31-3.6.79 2025-02-25 <dave at tiredofit dot ca>
 
    ### Changed
