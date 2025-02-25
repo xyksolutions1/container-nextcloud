@@ -386,5 +386,23 @@ directory_empty() {
 
 version_greater() {
     # version_greater A B returns whether A > B
-    [[ "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1" ]];
+    ver1_main=${1%-*}
+    ver2_main=${2%-*}
+    ver1_pre=${1#"$ver1_main"}
+    ver2_pre=${2#"$ver2_main"}
+
+    # If main versions are different, use standard comparison
+    if [ "$ver1_main" != "$ver2_main" ]; then
+        [[ "$(printf '%s\n' "$ver1_main" "$ver2_main" | sort -V | head -n 1)" != "$ver1_main" ]]
+    else
+        # If one version has a pre-release part and the other doesn't, consider the one without pre-release greater
+        if [ -z "$ver1_pre" ] && [ -n "$ver2_pre" ]; then
+            return 0
+        elif [ -n "$ver1_pre" ] && [ -z "$ver2_pre" ]; then
+            return 1
+        else
+            # Compare the pre-release parts
+            [[ "$(printf '%s\n' "$ver1_pre" "$ver2_pre" | sort -V | head -n 1)" != "$ver1_pre" ]]
+        fi
+    fi
 }
