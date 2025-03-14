@@ -1,3 +1,9 @@
+## 31-3.6.82 2025-03-13 <dave at tiredofit dot ca>
+
+   ### Added
+      - Nextcloud 31.0.1
+
+
 ## 31-3.6.81 2025-02-25 <fermion2020@github>
 
    ### Changed
