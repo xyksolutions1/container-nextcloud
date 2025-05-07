@@ -1,3 +1,9 @@
+## 30-3.6.77 2025-05-07 <dave at tiredofit dot ca>
+
+   ### Added
+      - Notify Push 1.1.0
+
+
 ## 30-3.6.76 2025-04-18 <dave at tiredofit dot ca>
 
    ### Added
