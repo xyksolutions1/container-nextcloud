@@ -7,7 +7,7 @@ LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 ARG NEXTCLOUD_VERSION
 ARG NEXTCLOUD_FILES_BACKEND_VERSION
 
-ENV NEXTCLOUD_VERSION=${NEXTCLOUD_VERSION:-"30.0.12"} \
+ENV NEXTCLOUD_VERSION=${NEXTCLOUD_VERSION:-"30.0.13"} \
     NEXTCLOUD_FILES_BACKEND_VERSION=${NEXTCLOUD_FILES_BACKEND_VERSION:-"v1.1.0"} \
     NEXTCLOUD_FILES_BACKEND_REPO_URL=${NEXTCLOUD_FILES_BACKEND_REPO_URL:-"https://github.com/nextcloud/notify_push"} \
     DLIB_VERSION=v19.24.4 \
@@ -100,6 +100,10 @@ RUN source /assets/functions/00-container && \
         #                unrar \
                         && \
     \
+    php-ext prepare && \
+    php-ext reset && \
+    php-ext enable core && \
+    php-ext enable core && \
     clone_git_repo "${DLIB_REPO_URL}" "${DLIB_VERSION}" && \
     cmake \
             -B build \
