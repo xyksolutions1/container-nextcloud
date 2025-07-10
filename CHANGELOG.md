@@ -1,3 +1,12 @@
+## 31-3.6.89 2025-07-10 <dave at tiredofit dot ca>
+
+   ### Added
+      - Nextcloud 31.0.7
+
+   ### Changed
+      - Reregister PHP plugins on container build
+
+
 ## 31-3.6.88 2025-06-12 <dave at tiredofit dot ca>
 
    ### Added
