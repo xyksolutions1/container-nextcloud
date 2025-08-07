@@ -1,3 +1,9 @@
+## 31-3.6.90 2025-08-07 <dave at tiredofit dot ca>
+
+   ### Added
+      - Update additional CSP headers to webserver (credit fermion2020@github)
+
+
 ## 31-3.6.89 2025-07-10 <dave at tiredofit dot ca>
 
    ### Added
