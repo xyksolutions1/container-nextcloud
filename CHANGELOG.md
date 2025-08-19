@@ -1,3 +1,9 @@
+## 31-3.6.93 2025-08-19 <dave at tiredofit dot ca>
+
+   ### Added
+      - notify_push 1.2.0
+
+
 ## 31-3.6.92 2025-08-14 <dave at tiredofit dot ca>
 
    ### Added
