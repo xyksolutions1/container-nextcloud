@@ -1,3 +1,11 @@
+## 30-3.6.82 2025-09-11 <dave at tiredofit dot ca>
+
+Add EOL Notice
+
+   ### Added
+      - Nextcloud 30.0.15
+
+
 ## 30-3.6.81 2025-08-14 <dave at tiredofit dot ca>
 
    ### Added
