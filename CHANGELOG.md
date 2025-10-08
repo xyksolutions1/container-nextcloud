@@ -1,3 +1,8 @@
+## 32-3.6.999 2025-10-08 <dave at tiredofit dot ca>
+
+Deprecate image and add EOL notice
+
+
 ## 32-3.6.95 2025-09-27 <dave at tiredofit dot ca>
 
    ### Added
