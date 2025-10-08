@@ -6,25 +6,25 @@ PROCESS_NAME="nextcloud"
 
 cat <<EOF
 
-**********************************************************************************************
-*                                                                                            *
-*                    END OF LIFE NOTICE AUGUST 18, 2025                                      *
-*                               tiredofit/nextcloud                                          *
-*                                                                                            *
-* This image is no longer maintained as of and will not receive updates.                     *
-*                                                                                            *
-* A successor image is available at:                                                         *
-*                                                                                            *
-* Repository | Documentation:                                                                *
-*   - https://github.com/nfrastack/container-nextcloud                                       *
-*                                                                                            *
-* Image Registries:                                                                          *
-*   - https://hub.docker.com/r/nfrastack/nextcloud                                           *
-*   - https://github.com/nfrastack/container-nextcloud/pkgs/container/container-nextcloud    *
-*                                                                                            *
-* Please visit https://nfrastack.com for more information.                                   *
-*                                                                                            *
-**********************************************************************************************
+*******************************************************************************************
+*                                                                                         *
+*                    END OF LIFE NOTICE OCTOBER 8, 2025                                   *
+*                               tiredofit/nextcloud                                       *
+*                                                                                         *
+* This image is no longer maintained as of and will not receive updates.                  *
+*                                                                                         *
+* A successor image is available at:                                                      *
+*                                                                                         *
+* Repository | Documentation:                                                             *
+*   - https://github.com/nfrastack/container-nextcloud                                    *
+*                                                                                         *
+* Image Registries:                                                                       *
+*   - https://hub.docker.com/r/nfrastack/nextcloud                                        *
+*   - https://github.com/nfrastack/container-nextcloud/pkgs/container/container-nextcloud *
+*                                                                                         *
+* Please visit https://nfrastack.com for more information.                                *
+*                                                                                         *
+*******************************************************************************************
 
 EOF
 
