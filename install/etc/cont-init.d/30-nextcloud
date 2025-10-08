@@ -6,6 +6,33 @@ PROCESS_NAME="nextcloud"
 
 check_service_initialized init 20-php-fpm
 
+
+cat <<EOF
+
+*******************************************************************************************
+*                                                                                         *
+*                    END OF LIFE NOTICE OCTOBER 8, 2025                                   *
+*                               tiredofit/nextcloud                                       *
+*                                                                                         *
+* This image is no longer maintained as of and will not receive updates.                  *
+*                                                                                         *
+* A successor image is available at:                                                      *
+*                                                                                         *
+* Repository | Documentation:                                                             *
+*   - https://github.com/nfrastack/container-nextcloud                                    *
+*                                                                                         *
+* Image Registries:                                                                       *
+*   - https://hub.docker.com/r/nfrastack/nextcloud                                        *
+*   - https://github.com/nfrastack/container-nextcloud/pkgs/container/container-nextcloud *
+*                                                                                         *
+* Please visit https://nfrastack.com for more information.                                *
+*                                                                                         *
+*******************************************************************************************
+
+EOF
+
+sleep 15
+
 transform_file_var \
                         ADMIN_PASS \
                         ADMIN_USER \
