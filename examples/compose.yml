@@ -1,9 +1,8 @@
 services:
 
   nextcloud-app:
-    image: tiredofit/nextcloud:29-latest
+    image: docker.io/nfrastack/nextcloud:32
     container_name: nextcloud-app
-    ### These labels are for Traefik Reverse Proxies
     labels:
       - traefik.enable=true
       - traefik.http.routers.nextcloud.rule=Host(`nextcloud.example.com`)
@@ -16,20 +15,13 @@ services:
       - traefik.http.middlewares.nextcloud-header.headers.stsSeconds=15552000
       - traefik.http.routers.nextcloud-app.middlewares=nextcloud-rep,nextcloud-header
     volumes:
+      - ./data/apps:/data/apps
       - ./data/data:/data/userdata
       - ./data/config:/www/nextcloud/config
-      - ./data/apps:/data/apps
-      - ./data/themes:/www/nextcloud/themes
-      - ./logs:/www/logs
       - ./data/templates:/data/templates
+      - ./data/themes:/www/nextcloud/themes
+      - ./logs:/logs
     environment:
-      ### These 4 lines below are for jwilder/nginx-proxy and
-      - VIRTUAL_HOST=nextcloud.example.com
-      - VIRTUAL_NETWORK=proxy
-      - LETSENCRYPT_HOST=nextcloud.example.com
-      - LETSENCRYPT_EMAIL=email@Hostname.com
-      ###
-
       - CRON_PERIOD=5
 
       - ADMIN_USER=admin
@@ -41,21 +33,16 @@ services:
       - DB_USER=nextcloud
       - DB_PASS=password
       - DB_HOST=nextcloud-db
-
-    ### These lines are for Fail2ban. If you don't want, comment and also add ENABLE_FAIL2BAN=FALSE to your environment
-    cap_add:
-      - NET_ADMIN
-    ###
     networks:
       - proxy
       - services
     restart: always
 
   nextcloud-db:
-    image: tiredofit/mariadb:10.11
+    image: docker.io/tiredofit/mariadb:10.11
     container_name: nextcloud-db
     volumes:
-      - /var/local/db/nextcloud:/var/lib/mysql
+      - ./db:/var/lib/mysql
     environment:
       - ROOT_PASS=password
       - DB_NAME=nextcloud
@@ -66,16 +53,18 @@ services:
     restart: always
 
   nextcloud-redis:
-    image: tiredofit/redis:7
+    image: docker.io/nfrastack/redis:7
     container_name: nextcloud-redis
     volumes:
       - ./redis:/data
+    environment:
+      - ENABLE_PERSISTENCE=TRUE
     networks:
       - services
     restart: always
 
   nextcloud-db-backup:
-    image: tiredofit/db-backup:latest
+    image: docker.io/tiredofit/db-backup:latest
     container_name: nextcloud-db-backup
     links:
       - nextcloud-db

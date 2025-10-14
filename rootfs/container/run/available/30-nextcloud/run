@@ -1,0 +1,17 @@
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/base/functions/container/init
+prepare_service 30-nextcloud
+SERVICE_NAME="nextcloud-files-backend"
+
+check_container_initialized
+check_service_initialized init
+
+print_start "Starting Nextcloud High Performance Files Backend"
+exec sudo -u "${NGINX_USER}" /opt/notify_push/bin/notify_push \
+                                                    --port ${FILES_BACKEND_PORT} \
+                                                    "${CONFIG_FILE}" \
+                                                    --nextcloud-url http://localhost:$(cat /etc/nginx/sites.available/nextcloud.conf | grep "listen .*;" | awk '{print $2}' | sed "s|;||g")

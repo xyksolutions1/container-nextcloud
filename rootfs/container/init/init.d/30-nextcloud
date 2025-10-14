@@ -1,0 +1,34 @@
+
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/base/functions/container/init
+prepare_service
+SERVICE_NAME="nextcloud"
+
+check_service_initialized init 20-php-fpm
+
+transform_file_var \
+                        ADMIN_PASS \
+                        ADMIN_USER \
+                        DB_HOST \
+                        DB_NAME \
+                        DB_PASS \
+                        DB_PORT \
+                        DB_USER \
+                        MONITORING_APPLICATION_TOKEN
+
+nextcloud_check_databases
+nextcloud_bootstrap_webroot
+nextcloud_configure_data_directories
+nextcloud_configure_logging
+if var_true "${CONTAINER_ENABLE_FIREWALL}" && var_true "${CONTAINER_ENABLE_FAIL2BAN}" ; then nextcloud_configure_fail2ban; fi
+nextcloud_install_application
+nextcloud_create_configuration
+nextcloud_configure_application_settings
+custom_files "${CONTAINER_CUSTOM_PATH}" "${NGINX_WEBROOT}" "${NGINX_USER}" "${NGINX_GROUP}"
+custom_scripts
+
+liftoff
