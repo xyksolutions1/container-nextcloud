@@ -4,6 +4,7 @@
       - Switched base image to nfrastack/nginx-php-fpm
       - Add JpegXL support
 
+
 ## 32-3.6.999 2025-10-08 <dave at tiredofit dot ca>
 
 Deprecate image and add EOL notice
