@@ -10,7 +10,7 @@ SERVICE_NAME="nextcloud"
 
 check_service_initialized init 20-php-fpm
 
-transform_file_var \
+transform_var file \
                         ADMIN_PASS \
                         ADMIN_USER \
                         DB_HOST \

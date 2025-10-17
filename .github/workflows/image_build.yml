@@ -21,20 +21,11 @@ jobs:
        DISTRO_LATEST: ${{ matrix.build.distro_latest || 'false' }}
        PHP_VERSION_LATEST: ${{ matrix.build.php_version_latest || 'false' }}
        ARCH: ${{ matrix.build.arch || 'linux/amd64,linux/arm64' }}
+       TAG_VARIANTS: "simple"
     steps:
       - name: Build Image
-        id: build_image
         uses: nfrastack/gha/.github/actions/build_phpfpm_dependent_multi_image@main
         with:
           docker_username: ${{ secrets.DOCKER_USERNAME }}
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and Push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Containerfile
-          platforms: ${{ env.ARCH }}
-          push: true
-          tags: ${{ steps.build_image.outputs.container_images }}
