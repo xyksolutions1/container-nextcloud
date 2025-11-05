@@ -10,7 +10,7 @@ SERVICE_NAME="nextcloud-files-backend"
 check_container_initialized
 check_service_initialized init
 
-print_start "Starting Nextcloud High Performance Files Backend"
+print_start "Starting Nextcloud High Performance Files Backend $(/opt/notify_push/bin/notify_push --version | awk '{print $2}')"
 exec sudo -u "${NGINX_USER}" /opt/notify_push/bin/notify_push \
                                                     --port ${FILES_BACKEND_PORT} \
                                                     "${CONFIG_FILE}" \

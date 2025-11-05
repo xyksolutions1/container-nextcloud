@@ -18,7 +18,7 @@ LABEL \
         org.opencontainers.image.licenses="MIT"
 
 ARG \
-    NEXTCLOUD_VERSION="32.0.0" \
+    NEXTCLOUD_VERSION="32.0.1" \
     NEXTCLOUD_FILES_BACKEND_VERSION="v1.2.0" \
     NEXTCLOUD_FILES_BACKEND_REPO_URL="https://github.com/nextcloud/notify_push" \
     DLIB_VERSION="v20.0" \
@@ -32,11 +32,6 @@ COPY README.md /usr/src/container/README.md
 
 ENV \
     CONTAINER_ENABLE_SCHEDULING=TRUE \
-    NGINX_CLIENT_BODY_TIMEOUT=600 \
-    NGINX_CLIENT_BODY_BUFFER_SIZE=512k \
-    NGINX_FASTCGI_BUFFERS="64 4k" \
-    NGINX_KEEP_ALIVE_TIMEOUT=600 \
-    NGINX_SEND_TIMEOUT=600 \
     NGINX_SITE_ENABLED=nextcloud \
     NGINX_WEBROOT="/www/nextcloud" \
     PHP_ENABLE_CREATE_SAMPLE_PHP=FALSE \
@@ -146,7 +141,7 @@ RUN echo "" && \
                 --prefix=/usr \
                 --with-php-config=php-config$(php-ext info base_alt) \
                 && \
-	make -j $(nproc) && \
+    make -j $(nproc) && \
     make install && \
     echo "extension=pdlib" > "$(php-ext info modules_path)"/pdlib.ini && \
     echo ";priority=20" >> "$(php-ext info modules_path)"/pdlib.ini && \
@@ -167,15 +162,10 @@ RUN echo "" && \
     container_build_log add "Nextcloud" "${NEXTCLOUD_VERSION}" "${NEXTCLOUD_REPO_URL}" && \
     \
     mkdir -p /opt/notify_push/bin/ && \
+    chown -R "${NGINX_USER}":"${NGINX_GROUP}" /opt/notify_push && \
     curl -sSL "${NEXTCLOUD_FILES_BACKEND_REPO_URL}"/releases/download/${NEXTCLOUD_FILES_BACKEND_VERSION}/notify_push-$(container_info arch)-unknown-linux-musl -o /opt/notify_push/bin/notify_push && \
     chmod +x /opt/notify_push/bin/notify_push && \
-    chown -R "${NGINX_USER}":"${NGINX_GROUP}" /opt/notify_push && \
     container_build_log add "Notify Push" "${NEXTCLOUD_FILES_BACKEND_VERSION}" "${NEXTCLOUD_FILES_BACKEND_REPO_URL}" && \
-    \
-    #mkdir -p /data/userdata && \
-    #touch /data/userdata/audit.log && \
-    #touch /data/userdata/flow.log && \
-    #touch /data/userdata/nextcloud.log && \
     \
     package remove \
                     DLIB_BUILD_DEPS \

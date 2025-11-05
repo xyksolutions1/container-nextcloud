@@ -4,35 +4,34 @@
 
 nextcloud_bootstrap_webroot() {
     installed_version="0.0.0~unknown"
-    create_folder "${NGINX_WEBROOT}" "${NGINX_USER}":"${NGINX_GROUP}" 755
-    silent rsync -a --delete --exclude /config/ --exclude /data/ --exclude /custom-apps/ --exclude /themes/ /container/data/nextcloud/ "${NGINX_WEBROOT}"/
+    create_folder "${NGINX_WEBROOT}" "${NGINX_USER}":"${NGINX_GROUP}" 750
+    silent rsync -a --delete --exclude /config/ --exclude /data/ --exclude /custom-apps/ --exclude /themes/ /container/data/nextcloud/install/ "${NGINX_WEBROOT%/}"/
     create_folder \
                     "${NGINX_WEBROOT%/}/config,\
                     ${NGINX_WEBROOT%/}/custom-apps,\
                     ${NGINX_WEBROOT%/}/data,\
                     ${NGINX_WEBROOT%/}/themes" \
-                    "${NGINX_USER}":"${NGINX_GROUP}" 755
+                    "${NGINX_USER}":"${NGINX_GROUP}" 750
 
-    chown -R "${NGINX_USER}":"${NGINX_GROUP}" "${NGINX_WEBROOT}"
+    #chown -R "${NGINX_USER}":"${NGINX_GROUP}" "${NGINX_WEBROOT}"
 
     for dir in config themes; do
-        if dir_empty "${NGINX_WEBROOT}"/"${dir}"; then
-            silent cp -arT /container/data/nextcloud/"$dir" "${NGINX_WEBROOT%/}"/"${dir}"
+        if dir_empty "${NGINX_WEBROOT%/}"/"${dir}"; then
+            silent cp -arT /container/data/nextcloud/install/"$dir" "${NGINX_WEBROOT%/}"/"${dir}"
         fi
     done
 
-    if [ "${APP_DIRECTORY%/}" != "${NGINX_WEBROOT}/custom-apps}" ]; then
+    if [ "${APP_PATH%/}" != "${NGINX_WEBROOT}/custom-apps}" ]; then
         rm -rf "${NGINX_WEBROOT%/}"/custom-apps
-        ln -sf "${APP_DIRECTORY}" "${NGINX_WEBROOT%/}"/custom-apps
+        ln -sf "${APP_PATH}" "${NGINX_WEBROOT%/}"/custom-apps
     fi
 
-    if dir_empty "${APP_DIRECTORY}"; then
-        silent cp -arT /container/data/nextcloud/custom-apps "${APP_DIRECTORY}"
+    if dir_empty "${APP_PATH}"; then
+        silent cp -arT /container/data/nextcloud/install/custom-apps "${APP_PATH}"
     fi
 }
 
 nextcloud_check_databases() {
-    ### Database Check
     case "${DB_TYPE,,}" in
     "mysql" | "mariadb")
         DB_PORT=${DB_PORT:-3306}
@@ -58,6 +57,38 @@ nextcloud_check_databases() {
 }
 
 nextcloud_configure_application_settings() {
+    ngo() {
+        local cf="${1}"
+        local ev="${2}"
+        local opt="${3}"
+        local nv="${4}"
+
+        if [ -n "${!ev}" ]; then
+            return 0
+        fi
+
+        if [ ! -f "${cf}" ]; then
+            return 1
+        fi
+
+        local cv=$(grep -oP "^\s*${opt}\s+\K[^;]+" "${cf}" | head -1)
+
+        if [ -z "${cv}" ]; then
+            return 1
+        fi
+
+        if [ "${cv}" != "${nv}" ]; then
+            print_debug "[ngo] Updating '${opt}' from '${cv}' to '${nv}' in ${cf}"
+            sed -i "s|^\(\s*${opt}\s\+\)[^;]\+;|\1${nv};|" "${cf}"
+        fi
+    }
+
+    ngo /etc/nginx/nginx.conf NGINX_CLIENT_BODY_TIMEOUT client_body_timeout 600
+    ngo /etc/nginx/nginx.conf NGINX_CLIENT_BODY_BUFFER_SIZE client_body_buffer_size 512k
+    ngo /etc/nginx/nginx.conf NGINX_FASTCGI_BUFFERS fastcgi_buffers "64 4k"
+    ngo /etc/nginx/nginx.conf NGINX_KEEP_ALIVE_TIMEOUT keepalive_timeout 600
+    ngo /etc/nginx/nginx.conf NGINX_SEND_TIMEOUT send_timeout 600
+
     if var_false "${CONTAINER_ENABLE_SCHEDULING}"; then
         silent sudo -u "${NGINX_USER}" php "${NGINX_WEBROOT}"/occ background:ajax
     else
@@ -83,7 +114,6 @@ nextcloud_configure_application_settings() {
         ((tindex += 1))
     done
 
-    ### Adjust source to allow Iframes (optional)
     if [ -n "${IFRAME_DOMAINS}" ]; then
         iframe_domains=$(echo "${IFRAME_DOMAINS}" | tr "," "\n")
         for iframe_domain in ${iframe_domains}; do
@@ -110,13 +140,13 @@ nextcloud_configure_application_settings() {
     if [ -n "${ADMIN_PASS}" ] && [ -n "${ADMIN_USER}" ]; then
         export OC_PASS="${ADMIN_PASS}"
         print_debug "Resetting Admin Password"
-        silent sudo --preserve-env=OC_PASS -u "${NGINX_USER}" php "${NGINX_WEBROOT$/}"/occ user:resetpassword --password-from-env ${ADMIN_USER}
+        silent sudo --preserve-env=OC_PASS -u "${NGINX_USER}" php "${NGINX_WEBROOT%/}"/occ user:resetpassword --password-from-env ${ADMIN_USER}
     fi
 
     if var_true "${ENABLE_FILES_BACKEND}"; then
         print_debug "Enabling Hi Performance Files Backend"
         if var_true "${fbproceed}"; then
-            update_template \
+            update_template \${}
                                 FILES_BACKEND_PROTOCOL \
                                 FILES_BACKEND_HOST \
                                 FILES_BACKEND_PORT \
@@ -131,10 +161,6 @@ nextcloud_configure_application_settings() {
         sed -i "/include \/etc\/nginx\/sites.available\/files_backend.snippet;/d" /etc/nginx/sites.available/nextcloud.conf
     fi
 
-    #### Force Reset Permissions for Security
-    #chown -R "${NGINX_USER}":"${NGINX_GROUP}" "${NGINX_WEBROOT}"
-
-    ### Add alias for running occ
     cat <<EOF | silent tee -a /root/.bashrc
 occ() {
       export oldpwd="\$(pwd)"
@@ -150,9 +176,9 @@ nextcloud_configure_logging() {
     sudo -u "${NGINX_USER}" touch "${LOG_PATH%/}"/"${LOG_FILE}"
     sudo -u "${NGINX_USER}" touch "${LOG_PATH%/}"/"${LOG_FILE_AUDIT}"
     sudo -u "${NGINX_USER}" touch "${LOG_PATH%/}"/"${LOG_FILE_FLOW}"
-    create_logrotate nextcloud "${LOG_PATH}"/"${LOG_FILE}" nextcloud "${NGINX_USER}" "${NGINX_GROUP}"
-    create_logrotate nextcloud-audit "${LOG_PATH}"/"${LOG_FILE_AUDIT}" none "${NGINX_USER}" "${NGINX_GROUP}"
-    create_logrotate nextcloud-flow "${LOG_PATH}"/"${LOG_FILE_FLOW}" none "${NGINX_USER}" "${NGINX_GROUP}"
+    create_logrotate nextcloud "${LOG_PATH%/}"/"${LOG_FILE}" nextcloud "${NGINX_USER}" "${NGINX_GROUP}"
+    create_logrotate nextcloud-audit "${LOG_PATH%/}"/"${LOG_FILE_AUDIT}" none "${NGINX_USER}" "${NGINX_GROUP}"
+    create_logrotate nextcloud-flow "${LOG_PATH%/}"/"${LOG_FILE_FLOW}" none "${NGINX_USER}" "${NGINX_GROUP}"
 }
 
 nextcloud_configure_fail2ban() {
@@ -174,15 +200,17 @@ EOF
 
 nextcloud_configure_data_directories() {
     create_folder \
-                    "${APP_DIRECTORY},\
-                    ${CACHE_DIRECTORY},\
-                    ${DATA_DIRECTORY},\
-                    ${SKELETON_DIRECTORY},\
-                    ${TEMP_DIRECTORY}" \
-                    "${NGINX_USER}":"${NGINX_GROUP}" 755
+                    "${DATA_PATH},\
+                    ${APP_PATH},
+                    ${CACHE_PATH},
+                    ${LOG_PATH},\
+                    ${SKELETON_PATH},\
+                    ${TMP_PATH},
+                    ${USERDATA_PATH}," \
+                    "${NGINX_USER}":"${NGINX_GROUP}" 750
 
     if var_true "${ENABLE_RESET_PERMISSIONS_DATA}" ; then
-        chown -R "${NGINX_USER}":"${NGINX_GROUP}" "${DATA_DIRECTORY}"
+        chown -R "${NGINX_USER}":"${NGINX_GROUP}" "${USERDATA_PATH}"
     fi
 }
 
@@ -198,8 +226,8 @@ include("${NGINX_WEBROOT}/config/config.php");
 \$CONFIG['appstoreenabled'] = ${ENABLE_APP_STORE};
 \$CONFIG['auth.bruteforce.protection.enabled'] = ${ENABLE_BRUTEFORCE_PROTECTION};
 \$CONFIG['cache_chunk_gc_ttl'] = '${CACHE_CHUNK_GC_TTL}';
-\$CONFIG['cache_path'] = '${CACHE_DIRECTORY}';
-\$CONFIG['check_data_directory_permissions'] = true;
+\$CONFIG['cache_path'] = '${CACHE_PATH}';
+\$CONFIG['check_data_PATH_permissions'] = true;
 \$CONFIG['check_for_working_htaccess'] = false;
 \$CONFIG['check_for_working_wellknown_setup'] = ${ENABLE_CHECK_WELLKNOWN};
 \$CONFIG['cipher'] = '${CIPHER}';
@@ -258,10 +286,10 @@ include("${NGINX_WEBROOT}/config/config.php");
 \$CONFIG['sharing.force_share_accept'] = ${SHARING_FORCE_ACCEPT};
 \$CONFIG['sharing.enable_share_mail'] = ${SHARING_ENABLE_MAIL};
 \$CONFIG['simpleSignUpLink.shown'] = ${ENABLE_SIGN_UP};
-\$CONFIG['skeletondirectory'] = '${SKELETON_DIRECTORY}';
+\$CONFIG['skeletondirectory'] = '${SKELETON_PATH}';
 \$CONFIG['sort_groups_by_name'] = ${SORT_GROUPS_BY_NAME};
 \$CONFIG['sqlite.journal_mode'] = 'DELETE';
-\$CONFIG['tempdirectory'] = '${TEMP_DIRECTORY}';
+\$CONFIG['tempdirectory'] = '${TEMP_PATH}';
 \$CONFIG['theme'] = '${THEME}';
 \$CONFIG['token_auth_enforced'] = ${ENABLE_TOKEN_AUTH_ENFORCED};
 \$CONFIG['trashbin_retention_obligation'] = '${TRASHBIN_RETENTION}';
@@ -279,10 +307,11 @@ EOF
 }
 
 nextcloud_install_application() {
-    if [ -f "${DATA_DIRECTORY%/}/.version" ]; then
-        installed_version=$(head -n 1 "${DATA_DIRECTORY%/}"/.version | awk '{print $1}')
+    set -x
+    if [ -f "${USERDATA_PATH%/}/.version" ]; then
+        installed_version=$(head -n 1 "${USERDATA_PATH%/}"/.version | awk '{print $1}')
     else
-        echo "${NEXTCLOUD_VERSION} migrated from existing install on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | silent tee -a "${DATA_DIRECTORY%/}"/.version
+        echo "${NEXTCLOUD_VERSION} migrated from existing install on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | silent tee -a "${USERDATA_PATH%/}"/.version
     fi
 
     if version_greater "$installed_version" "${NEXTCLOUD_VERSION}"; then
@@ -299,20 +328,19 @@ nextcloud_install_application() {
                 silent sudo -u "${NGINX_USER}" php "${NGINX_WEBROOT%/}"/occ app:list  | tee /tmp/nextcloud_applist_post
                 print_warn "The following apps have been disabled:"
                 diff <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_pre) <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_post) | grep '<' | cut -d- -f2 | cut -d: -f1
-                diff <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_pre) <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_post) | grep '<' | cut -d- -f2 | cut -d: -f1 | silent tee -a ${DATA_DIRECTORY}/.version
-                echo "${NEXTCLOUD_VERSION} automatically upgraded on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | cat - "${DATA_DIRECTORY$/}"/.version >/tmp/.version && mv /tmp/.version "${DATA_DIRECTORY$/}"/.version
+                diff <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_pre) <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_post) | grep '<' | cut -d- -f2 | cut -d: -f1 | silent tee -a ${USERDATA_PATH}/.version
+                echo "${NEXTCLOUD_VERSION} automatically upgraded on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | cat - "${USERDATA_PATH$/}"/.version >/tmp/.version && mv /tmp/.version "${USERDATA_PATH$/}"/.version
                 rm -f /tmp/nextcloud_applist_{pre,post}
             fi
         fi
     fi
 
+    set +x
     if [ ! -f "${NGINX_WEBROOT}"/config/config.php ]; then
         print_warn "New Installation Detected"
 
         sanity_var ADMIN_USER "Administrative User"
         sanity_var ADMIN_PASS "Administrative Password"
-
-        chown -R "${NGINX_USER}":"${NGINX_GROUP}" /container/data/nextcloud
 
         instanceid=nc$(dd if=/dev/urandom bs=1 count=40 2>/dev/null | sha1sum | fold -w 10 | head -n 1)
 
@@ -320,7 +348,7 @@ nextcloud_install_application() {
 <?php
 \$CONFIG = array (
   'instanceid' => '$instanceid',
-  'datadirectory' => '${DATA_DIRECTORY}',
+  'datadirectory' => '${USERDATA_PATH}',
 
   "apps_paths" => array (
       0 => array (
@@ -329,7 +357,7 @@ nextcloud_install_application() {
               "writable" => false,
       ),
       1 => array (
-              "path"     => "${APP_DIRECTORY}",
+              "path"     => "${APP_PATH}",
               "url"      => "/custom-apps",
               "writable" => true,
       ),
@@ -339,20 +367,20 @@ nextcloud_install_application() {
 EOF
 
         print_warn "Starting automatic configuration for Nextcloud version ${NEXTCLOUD_VERSION}"
-        chown -R "${NGINX_USER}":"${NGINX_GROUP}" "${NGINX_WEBROOT}"
+        #chown -R "${NGINX_USER}":"${NGINX_GROUP}" "${NGINX_WEBROOT}"
         sudo -u "${NGINX_USER}" touch "${NGINX_WEBROOT}"/config/CAN_INSTALL
         silent sudo -u "${NGINX_USER}" php "${NGINX_WEBROOT}"/occ maintenance:install \
             -n -q \
             --admin-user "${ADMIN_USER}" \
             --admin-pass "${ADMIN_PASS}" \
-            --data-dir="${DATA_DIRECTORY}" \
+            --data-dir="${USERDATA_PATH}" \
             ${install_options}
         rm -rf "${NGINX_WEBROOT}"/config/CAN_INSTALL
         print_warn "Automatic configuration finished."
         #chown -R "${NGINX_USER}":"${NGINX_GROUP}" "${NGINX_WEBROOT}"/
         # Enable/disable apps. Note that this must be done after the Nextcloud setup.
         silent sudo -u "${NGINX_USER}" php "${NGINX_WEBROOT}"/occ app:disable firstrunwizard
-        echo "${NEXTCLOUD_VERSION} first installed on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | silent tee -a "${DATA_DIRECTORY%/}"/.version
+        echo "${NEXTCLOUD_VERSION} first installed on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | silent tee -a "${USERDATA_PATH%/}"/.version
     fi
 }
 

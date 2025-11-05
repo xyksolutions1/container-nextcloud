@@ -3,6 +3,8 @@
    ### Changed
       - Switched base image to nfrastack/nginx-php-fpm
       - Add JpegXL support
+      - Nextcloud 32.0.1
+      - Changed _DIRECTORY and _PATH variables
 
 ## 32-3.6.999 2025-10-08 <dave at tiredofit dot ca>
 
