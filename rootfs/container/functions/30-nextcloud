@@ -83,7 +83,7 @@ nextcloud_configure_application_settings() {
         fi
     }
 
-    ngo /etc/nginx/nginx.conf NGINX_CLIENT_BODY_TIMEOUT client_body_timeout 600
+    ngo /etc/nginx/nginx.conf NGINX_CLIENT_BODY_TIMEOUT client_body_timeout 300s
     ngo /etc/nginx/nginx.conf NGINX_CLIENT_BODY_BUFFER_SIZE client_body_buffer_size 512k
     ngo /etc/nginx/nginx.conf NGINX_FASTCGI_BUFFERS fastcgi_buffers "64 4k"
     ngo /etc/nginx/nginx.conf NGINX_KEEP_ALIVE_TIMEOUT keepalive_timeout 600
