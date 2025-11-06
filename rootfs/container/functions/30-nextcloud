@@ -307,6 +307,7 @@ EOF
 }
 
 nextcloud_install_application() {
+    NEXTCLOUD_VERSION=$(cat /container/build/nfrastack_nextcloud/build.log | grep -o "ADD:Nextcloud .* |" | awk '{print $3}')
     if [ -f "${USERDATA_PATH%/}/.version" ]; then
         installed_version=$(head -n 1 "${USERDATA_PATH%/}"/.version | awk '{print $1}')
     else
