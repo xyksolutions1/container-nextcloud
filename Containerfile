@@ -185,7 +185,6 @@ RUN echo "" && \
     package remove \
                     DLIB_BUILD_DEPS \
                     PDLIB_BUILD_DEPS \
-                    \
                     && \
     package cleanup
 
