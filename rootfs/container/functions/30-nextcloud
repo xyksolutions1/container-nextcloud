@@ -86,8 +86,8 @@ nextcloud_configure_application_settings() {
     ngo /etc/nginx/nginx.conf NGINX_CLIENT_BODY_TIMEOUT client_body_timeout 300s
     ngo /etc/nginx/nginx.conf NGINX_CLIENT_BODY_BUFFER_SIZE client_body_buffer_size 512k
     ngo /etc/nginx/nginx.conf NGINX_FASTCGI_BUFFERS fastcgi_buffers "64 4k"
-    ngo /etc/nginx/nginx.conf NGINX_KEEP_ALIVE_TIMEOUT keepalive_timeout 600
-    ngo /etc/nginx/nginx.conf NGINX_SEND_TIMEOUT send_timeout 600
+    ngo /etc/nginx/nginx.conf NGINX_KEEP_ALIVE_TIMEOUT keepalive_timeout 600s
+    ngo /etc/nginx/nginx.conf NGINX_SEND_TIMEOUT send_timeout 600s
 
     if var_false "${CONTAINER_ENABLE_SCHEDULING}"; then
         silent sudo -u "${NGINX_USER}" php "${NGINX_WEBROOT}"/occ background:ajax
@@ -307,7 +307,6 @@ EOF
 }
 
 nextcloud_install_application() {
-    set -x
     if [ -f "${USERDATA_PATH%/}/.version" ]; then
         installed_version=$(head -n 1 "${USERDATA_PATH%/}"/.version | awk '{print $1}')
     else
@@ -335,7 +334,6 @@ nextcloud_install_application() {
         fi
     fi
 
-    set +x
     if [ ! -f "${NGINX_WEBROOT}"/config/config.php ]; then
         print_warn "New Installation Detected"
 
