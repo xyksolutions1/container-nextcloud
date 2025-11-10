@@ -328,8 +328,8 @@ nextcloud_install_application() {
                 silent sudo -u "${NGINX_USER}" php "${NGINX_WEBROOT%/}"/occ app:list  | tee /tmp/nextcloud_applist_post
                 print_warn "The following apps have been disabled:"
                 diff <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_pre) <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_post) | grep '<' | cut -d- -f2 | cut -d: -f1
-                diff <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_pre) <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_post) | grep '<' | cut -d- -f2 | cut -d: -f1 | silent tee -a ${USERDATA_PATH}/.version
-                echo "${NEXTCLOUD_VERSION} automatically upgraded on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | cat - "${USERDATA_PATH$/}"/.version >/tmp/.version && mv /tmp/.version "${USERDATA_PATH$/}"/.version
+                diff <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_pre) <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_post) | grep '<' | cut -d- -f2 | cut -d: -f1 | silent tee -a ${USERDATA_PATH%/}/.version
+                echo "${NEXTCLOUD_VERSION} automatically upgraded on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | cat - "${USERDATA_PATH%/}"/.version >/tmp/.version && mv /tmp/.version "${USERDATA_PATH%/}"/.version
                 rm -f /tmp/nextcloud_applist_{pre,post}
             fi
         fi
@@ -369,15 +369,14 @@ EOF
         #chown -R "${NGINX_USER}":"${NGINX_GROUP}" "${NGINX_WEBROOT}"
         sudo -u "${NGINX_USER}" touch "${NGINX_WEBROOT}"/config/CAN_INSTALL
         silent sudo -u "${NGINX_USER}" php "${NGINX_WEBROOT}"/occ maintenance:install \
-            -n -q \
-            --admin-user "${ADMIN_USER}" \
-            --admin-pass "${ADMIN_PASS}" \
-            --data-dir="${USERDATA_PATH}" \
-            ${install_options}
+                                                                                        -n -q \
+                                                                                        --admin-user "${ADMIN_USER}" \
+                                                                                        --admin-pass "${ADMIN_PASS}" \
+                                                                                        --data-dir="${USERDATA_PATH}" \
+                                                                                        ${install_options}
         rm -rf "${NGINX_WEBROOT}"/config/CAN_INSTALL
-        print_warn "Automatic configuration finished."
+        #print_warn "Automatic configuration finished."
         #chown -R "${NGINX_USER}":"${NGINX_GROUP}" "${NGINX_WEBROOT}"/
-        # Enable/disable apps. Note that this must be done after the Nextcloud setup.
         silent sudo -u "${NGINX_USER}" php "${NGINX_WEBROOT}"/occ app:disable firstrunwizard
         echo "${NEXTCLOUD_VERSION} first installed on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | silent tee -a "${USERDATA_PATH%/}"/.version
     fi
@@ -386,7 +385,6 @@ EOF
 version_greater() {
     ver1_main=$(echo "$1" | grep -o '^[0-9.]*')
     ver2_main=$(echo "$2" | grep -o '^[0-9.]*')
-
     ver1_pre=${1#"$ver1_main"}
     ver2_pre=${2#"$ver2_main"}
 

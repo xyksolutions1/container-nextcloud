@@ -39,7 +39,7 @@ services:
     restart: always
 
   nextcloud-db:
-    image: docker.io/tiredofit/mariadb:10.11
+    image: docker.io/nfrastack/mariadb:11.8
     container_name: nextcloud-db
     volumes:
       - ./db:/var/lib/mysql
