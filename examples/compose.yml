@@ -42,7 +42,7 @@ services:
     image: docker.io/nfrastack/mariadb:11.8
     container_name: nextcloud-db
     volumes:
-      - ./db:/var/lib/mysql
+      - ./db:/data
     environment:
       - ROOT_PASS=password
       - DB_NAME=nextcloud
