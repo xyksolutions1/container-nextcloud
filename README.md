@@ -106,35 +106,37 @@ Below is the complete list of available options that can be used to customize yo
 
 * Variables showing an 'x' under the `Advanced` column can only be set if the containers advanced functionality is enabled.
 
-| Parameter                      | Description                                                                                                         | Default   | `_FILE` |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------- | --------- | ------- |
-| `ADMIN_USER`                   | Admin user e.g. `admin`                                                                                             |           | x       |
-| `ADMIN_PASS`                   | Admin pass e.g. `password`                                                                                          |           | x       |
-| `DOMAIN`                       | The Domain that this is configured for e.g. 'example.org'                                                           |           |         |
-| `DB_TYPE`                      | Set the DB_TYPE - e.g. `mysql`, `postgres`, `sqlite3`                                                               | `sqlite3` |         |
-| `DB_HOST`                      | Hostname of DB Server e.g. `nextcloud-db`                                                                           |           | x       |
-| `DB_NAME`                      | Database name e.g. `nextcloud`                                                                                      |           | x       |
-| `DB_PORT`                      | Database port e.g. `3306`                                                                                           |           | x       |
-| `DB_USER`                      | Username for Database e.g. `nextcloud`                                                                              |           | x       |
-| `DB_PASS`                      | Password for Database e.g. `password`                                                                               |           | x       |
-| `IFRAME_DOMAINS`               | Comma seperated value of domains/hostnames you want to allow loading the site via an IFrame e.g. `site.example.com` |           |         |
-| `MONITORING_APPLICATION_TOKEN` | Monitoring Application Token if 'serverinfo' application installed                                                  |           | x       |
+| Parameter                      | Description                                                                                                         | Default            | `_FILE` |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------- | ------------------ | ------- |
+| `ADMIN_USER`                   | Admin user e.g. `admin`                                                                                             |                    | x       |
+| `ADMIN_PASS`                   | Admin pass e.g. `password`                                                                                          |                    | x       |
+| `DOMAIN`                       | The Domain that this is configured for e.g. 'example.org'                                                           |                    |         |
+| `DB_TYPE`                      | Set the DB_TYPE - e.g. `mysql`, `postgres`, `sqlite3`                                                               | `sqlite3`          |         |
+| `DB_HOST`                      | Hostname of DB Server e.g. `nextcloud-db`                                                                           |                    | x       |
+| `DB_NAME`                      | Database name e.g. `nextcloud`                                                                                      |                    | x       |
+| `DB_PORT`                      | Database port e.g. `3306`                                                                                           |                    | x       |
+| `DB_USER`                      | Username for Database e.g. `nextcloud`                                                                              |                    | x       |
+| `DB_PASS`                      | Password for Database e.g. `password`                                                                               |                    | x       |
+| `IFRAME_DOMAINS`               | Comma seperated value of domains/hostnames you want to allow loading the site via an IFrame e.g. `site.example.com` |                    |         |
+| `MONITORING_APPLICATION_TOKEN` | Monitoring Application Token if 'serverinfo' application installed                                                  |                    | x       |
+| `NEXTCLOUD_USER`               | User for accessing and writing Nextcloud Files                                                                      | `${NGINX_USER}`    |         |
+| `NEXTCLOUD_GROUP`              | Group for accessing Nextcloud Files                                                                                 | `${NGINX_GROUP}`   |         |
+| `NEXTCLOUD_WEBROOT`            | Webroot for Nextcloud files                                                                                         | `${NGINX_WEBROOT}` |         |
 
 This image automatically configures nextcloud with the following options as defined in [config.sample.php](https://github.com/nextcloud/server/blob/master/config/config.sample.php).
 
 | Variable             | Description              | Default                           |
 | -------------------- | ------------------------ | --------------------------------- |
-| `DATA_DIRECTORY`     | Data Directory           | `${DATA_PATH}/userdata`           |
-| `APP_DIRECTORY`      | Custom Applications      | `${DATA_PATH}/apps`               |
-| `CACHE_DIRECTORY`    | Temporary Cache          | `${DATA_PATH}/cache`              |
-| `USERDATA_DIRECTORY` | User and Group Data      | `${DATA_PATH}/userdata`           |
-| `SKELETON_DIRECTORY` | Initial Profile Skeleton | `${DATA_PATH}/templates/skeleton` |
-| `TEMP_DIRECTORY`     | Temporary Files          | `${DATA_PATH}/tmp`                |
+| `DATA_PATH`     | Data Directory           | `${DATA_PATH}/userdata`           |
+| `APP_PATH`      | Custom Applications      | `${DATA_PATH}/apps`               |
+| `CACHE_PATH`    | Temporary Cache          | `${DATA_PATH}/cache`              |
+| `USERDATA_PATH` | User and Group Data      | `${DATA_PATH}/userdata`           |
+| `SKELETON_PATH` | Initial Profile Skeleton | `${DATA_PATH}/templates/skeleton` |
+| `TEMP_PATH`     | Temporary Files          | `${DATA_PATH}/tmp`                |
 
 | Variable                           | Description                                   | Nextcloud Attribute                         | Default            |
 | ---------------------------------- | --------------------------------------------- | ------------------------------------------- | ------------------ |
 | `ANIMATED_GIFS_MAX_FILESIZE`       | Max file size for Animated Gifs               | `max_filesize_animated_gifs_public_sharing` | `10`               |
-| `CACHE_DIRECTORY`                  | Cache Directory (leave blank for default)     |                                             | ``                 |
 | `CIPHER`                           | Encryption Cipher                             | `cipher`                                    | `AES-256-CFB`      |
 | `DEFAULT_APPLICATION`              | Default Application users see                 | `defaultapp`                                | `files`            |
 | `DEFAULT_LANGUAGE`                 | Default Language to Install                   | `default_language`                          | `en`               |
@@ -192,9 +194,6 @@ This image automatically configures nextcloud with the following options as defi
 | `TRASHBIN_RETENTION`               | How to deal with users trashbins              | `trashbin_retention_obligation`             | `auto`             |
 | `VERSIONS_RETENTION`               | How to deal with File Versions                | `versions_retention_obligation`             | `auto`             |
 
-### Networking
-
-The following ports are exposed.
 
 * * *
 ## Maintenance

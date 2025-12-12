@@ -31,6 +31,8 @@ COPY LICENSE /usr/src/container/LICENSE
 COPY README.md /usr/src/container/README.md
 
 ENV \
+    NEXTCLOUD_USER=nginx \
+    NEXTCLOUD_GROUP=www-data \
     CONTAINER_ENABLE_SCHEDULING=TRUE \
     NGINX_SITE_ENABLED=nextcloud \
     NGINX_WEBROOT="/www/nextcloud" \
@@ -130,6 +132,8 @@ RUN echo "" && \
     \
     source /container/base/functions/container/build && \
     container_build_log image && \
+    create_user nextcloud 1000 nextcloud 1000 && \
+    add_user_group nextcloud www-data && \
     package update && \
     package upgrade && \
     package install \
