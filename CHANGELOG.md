@@ -5,6 +5,7 @@
       - Add JpegXL support
       - Nextcloud 32.0.3
       - Changed _DIRECTORY and _PATH variables
+      - Notify Push 1.3.0
 
 ## 32-3.6.999 2025-10-08 <dave at tiredofit dot ca>
 
