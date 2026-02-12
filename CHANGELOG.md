@@ -3,7 +3,7 @@
    ### Changed
       - Switched base image to nfrastack/nginx-php-fpm
       - Add JpegXL support
-      - Nextcloud 32.0.5
+      - Nextcloud 32.0.6
       - Changed _DIRECTORY and _PATH variables
       - Notify Push 1.3.0
 
