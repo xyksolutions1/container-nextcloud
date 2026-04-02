@@ -1,3 +1,9 @@
+## 32-3.7.2 2026-04-02 <code at nfastack dot com>
+
+   ### Changed
+      - Fix Maintenance Window Functionality
+
+
 ## 32-3.7.1 2026-04-02 <code at nfastack dot com>
 
    ### Added
