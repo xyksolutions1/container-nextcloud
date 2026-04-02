@@ -14,18 +14,21 @@ services:
       - traefik.http.middlewares.nextcloud-header.headers.stsIncludeSubdomains=true
       - traefik.http.middlewares.nextcloud-header.headers.stsSeconds=15552000
       - traefik.http.routers.nextcloud-app.middlewares=nextcloud-rep,nextcloud-header
+    ports:
+      - 8001:80
     volumes:
       - ./data/apps:/data/apps
-      - ./data/data:/data/userdata
       - ./data/config:/www/nextcloud/config
+      - ./data/data:/data/userdata
       - ./data/templates:/data/templates
       - ./data/themes:/www/nextcloud/themes
       - ./logs:/logs
     environment:
-      - CRON_PERIOD=5
+      - TIMEZONE=America/Vancouver
 
       - ADMIN_USER=admin
       - ADMIN_PASS=pass
+
       - DOMAIN=example.com
 
       - DB_TYPE=mysql
@@ -33,6 +36,8 @@ services:
       - DB_USER=nextcloud
       - DB_PASS=password
       - DB_HOST=nextcloud-db
+
+      - REDIS_HOST=nextcloud-redis
     networks:
       - proxy
       - services
@@ -44,6 +49,8 @@ services:
     volumes:
       - ./db:/data
     environment:
+      - TIMEZONE=America/Vancouver
+
       - ROOT_PASS=password
       - DB_NAME=nextcloud
       - DB_USER=nextcloud
@@ -58,6 +65,8 @@ services:
     volumes:
       - ./redis:/data
     environment:
+      - TIMEZONE=America/Vancouver
+
       - ENABLE_PERSISTENCE=TRUE
     networks:
       - services
@@ -66,11 +75,11 @@ services:
   nextcloud-db-backup:
     image: docker.io/tiredofit/db-backup:latest
     container_name: nextcloud-db-backup
-    links:
-      - nextcloud-db
     volumes:
       - ./dbbackup:/backup
     environment:
+      - TIMEZONE=America/Vancouver
+
       - DB01_HOST=nextcloud-db
       - DB01_TYPE=mariadb
       - DB01_NAME=nextcloud

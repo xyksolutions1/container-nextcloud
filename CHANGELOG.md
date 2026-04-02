@@ -1,11 +1,14 @@
-## 32-3.7.0pre 2025-10-08 <code at nfrastack dot com>
+## 32-3.7.0 2026-04-01 <code at nfastack dot com>
 
-   ### Changed
-      - Switched base image to nfrastack/nginx-php-fpm
+   ### Added
+      - Switched base image to nfrastack/nginx-php-fpm:8.x
       - Add JpegXL support
-      - Nextcloud 32.0.6
+      - Nextcloud 32.0.7
       - Changed _DIRECTORY and _PATH variables
-      - Notify Push 1.3.0
+      - Added REDIS_HOST, REDIS_DB, REDIS_PORT, REDIS_PASS details
+      - Add ENABLE_CACHE to automatically setup APCu or Redis
+      - Notify Push 1.3.1
+
 
 ## 32-3.6.999 2025-10-08 <dave at tiredofit dot ca>
 

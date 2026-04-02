@@ -122,11 +122,16 @@ Below is the complete list of available options that can be used to customize yo
 | `NEXTCLOUD_USER`               | User for accessing and writing Nextcloud Files                                                                      | `${NGINX_USER}`    |         |
 | `NEXTCLOUD_GROUP`              | Group for accessing Nextcloud Files                                                                                 | `${NGINX_GROUP}`   |         |
 | `NEXTCLOUD_WEBROOT`            | Webroot for Nextcloud files                                                                                         | `${NGINX_WEBROOT}` |         |
+| `REDIS_HOST`                   | Redis Hostname for Caching (`ENABLE_CACHE=TRUE`)                                                                                         | ``                 |
+| `REDIS_PORT`                   | Redis Port for Caching                                                                                              | `6379`             |
+| `REDIS_DB`                     | Redis Database Number                                                                                               | `0`                |
+| `REDIS_PASS`                   | (optional) Redis Passphrase                                                                                         | ``                 |
+
 
 This image automatically configures nextcloud with the following options as defined in [config.sample.php](https://github.com/nextcloud/server/blob/master/config/config.sample.php).
 
-| Variable             | Description              | Default                           |
-| -------------------- | ------------------------ | --------------------------------- |
+| Variable        | Description              | Default                           |
+| --------------- | ------------------------ | --------------------------------- |
 | `DATA_PATH`     | Data Directory           | `${DATA_PATH}/userdata`           |
 | `APP_PATH`      | Custom Applications      | `${DATA_PATH}/apps`               |
 | `CACHE_PATH`    | Temporary Cache          | `${DATA_PATH}/cache`              |
@@ -144,6 +149,7 @@ This image automatically configures nextcloud with the following options as defi
 | `ENABLE_APP_CODE_CHECKER`          | Check for signatures on all code              | `appcodechecker`                            | `TRUE`             |
 | `ENABLE_APP_STORE`                 | Enable App Store                              | `appstoreenabled`                           | `TRUE`             |
 | `ENABLE_BRUTEFORCE_PROTECTION`     | Enable Brute Force Protection                 | `auth.bruteforce.protection.enabled`        | `TRUE`             |
+| `ENABLE_CACHE`                     | Enable APCu and or Redis Caching              | `TRUE`                                      |                    |
 | `ENABLE_CHECK_WELLKNOWN`           | Enable .wellknown check in admin              |                                             | `TRUE`             |
 | `ENABLE_DISPLAY_NAME_CHANGE`       | Allow user to change name                     | `allow_user_to_change_display_name`         | `TRUE`             |
 | `ENABLE_FILESYSTEM_CHECK_CHANGES`  | Check changes on Filesystem in Background     | `filesystem_check_changes`                  | `FALSE`            |
