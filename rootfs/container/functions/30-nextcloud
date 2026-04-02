@@ -103,6 +103,12 @@ nextcloud_configure_application_settings() {
     else
         echo "*/${CRON_PERIOD} * * * * sudo -u ${NEXTCLOUD_USER} TZ=${TIMEZONE} php -d memory_limit=${PHP_MEMORY_LIMIT} -f ${NEXTCLOUD_WEBROOT}/cron.php >/dev/null 2>&1"  | write_file /container/cron/nextcloud
         silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT}"/occ background:cron
+        if var_true "${ENABLE_MAINTENANCE_WINDOW}" ; then
+           silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ occ config:system:set maintenance_window_start --value="${MAINTENANCE_WINDOW_START_HOUR}" --type=integer
+        else
+            print_debug "Disabling Maintenance Window"
+            silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ occ config:system:set maintenance_window_start --value="100" --type=integer
+        fi
     fi
 
     silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ config:app:set admin_audit logfile --value="${LOG_PATH%/}"/"${LOG_FILE_AUDIT}"
@@ -150,6 +156,10 @@ nextcloud_configure_application_settings() {
         export OC_PASS="${ADMIN_PASS}"
         print_debug "Resetting Admin Password"
         silent sudo --preserve-env=OC_PASS -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ user:resetpassword --password-from-env ${ADMIN_USER}
+    fi
+
+    if [ -n "${SERVER_ID}" ]; then
+        silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ config:system:set server_id --value="${SERVER_ID}" --type=string
     fi
 
     if var_true "${ENABLE_FILES_BACKEND}" && [ -n "${REDIS_HOST}" ]; then
