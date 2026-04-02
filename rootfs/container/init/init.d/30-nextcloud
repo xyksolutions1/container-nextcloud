@@ -1,6 +1,6 @@
 
 #!/command/with-contenv bash
-# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+# SPDX-FileCopyrightText: © 2026 Nfrastack <code@nfrastack.com>
 #
 # SPDX-License-Identifier: MIT
 
@@ -28,7 +28,7 @@ if var_true "${CONTAINER_ENABLE_FIREWALL}" && var_true "${CONTAINER_ENABLE_FAIL2
 nextcloud_install_application
 nextcloud_create_configuration
 nextcloud_configure_application_settings
-custom_files "${CONTAINER_CUSTOM_PATH}" "${NGINX_WEBROOT}" "${NGINX_USER}" "${NGINX_GROUP}"
+custom_files "${CONTAINER_CUSTOM_PATH}" "${NEXTCLOUD_WEBROOT}" "${NGINX_USER}" "${NGINX_GROUP}"
 custom_scripts
 
 liftoff

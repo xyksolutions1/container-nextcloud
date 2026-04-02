@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+# SPDX-FileCopyrightText: © 2026 Nfrastack <code@nfrastack.com>
 #
 # SPDX-License-Identifier: MIT
 
@@ -6,14 +6,13 @@ nextcloud_bootstrap_webroot() {
     installed_version="0.0.0~unknown"
     create_folder "${NEXTCLOUD_WEBROOT}" "${NEXTCLOUD_USER}":"${NEXTCLOUD_GROUP}" 750
     silent rsync -a --delete --exclude /config/ --exclude /data/ --exclude /custom-apps/ --exclude /themes/ /container/data/nextcloud/install/ "${NEXTCLOUD_WEBROOT%/}"/
+
     create_folder \
                     "${NEXTCLOUD_WEBROOT%/}/config,\
-                    ${NEXTCLOUD_WEBROOT%/}/custom-apps,\
-                    ${NEXTCLOUD_WEBROOT%/}/data,\
-                    ${NEXTCLOUD_WEBROOT%/}/themes" \
+                     ${NEXTCLOUD_WEBROOT%/}/custom-apps,\
+                     ${NEXTCLOUD_WEBROOT%/}/data,\
+                     ${NEXTCLOUD_WEBROOT%/}/themes" \
                     "${NEXTCLOUD_USER}":"${NEXTCLOUD_GROUP}" 750
-
-    #chown -R "${NEXTCLOUD_USER}":"${NEXTCLOUD_GROUP}" "${NEXTCLOUD_WEBROOT}"
 
     for dir in config themes; do
         if dir_empty "${NEXTCLOUD_WEBROOT%/}"/"${dir}"; then
@@ -33,26 +32,26 @@ nextcloud_bootstrap_webroot() {
 
 nextcloud_check_databases() {
     case "${DB_TYPE,,}" in
-    "mysql" | "mariadb")
-        DB_PORT=${DB_PORT:-3306}
-        sanity_db mariadb
-        db_ready mariadb
-        install_options="--database=mysql --database-host=${DB_HOST} --database-name=${DB_NAME} --database-user=${DB_USER} --database-pass=${DB_PASS} --database-table-space=${DB_PREFIX} --database-port=${DB_PORT}"
-        ;;
-    sqlite*)
-        DB_TYPE="sqlite3"
-        install_options="--database-name $SQLITE_DATABASE"
-        ;;
-    postgres*)
-        DB_PORT=${DB_PORT:-5432}
-        sanity_db
-        db_ready postgres
-        install_options="--database=pgsql --database-host=${DB_HOST} --database-name=${DB_NAME} --database-user=${DB_USER} --database-pass=${DB_PASS} --database-table-space=${DB_PREFIX} --database-port=${DB_PORT}"
-        ;;
-    *)
-        print_error "Unknown DB_TYPE Variable - Exiting"
-        exit 1
-        ;;
+        "mysql" | "mariadb")
+            DB_PORT=${DB_PORT:-3306}
+            sanity_db mariadb
+            db_ready mariadb
+            install_options="--database=mysql --database-host=${DB_HOST} --database-name=${DB_NAME} --database-user=${DB_USER} --database-pass=${DB_PASS} --database-table-space=${DB_PREFIX} --database-port=${DB_PORT}"
+            ;;
+        sqlite*)
+            DB_TYPE="sqlite3"
+            install_options="--database-name $SQLITE_DATABASE"
+            ;;
+        postgres*)
+            DB_PORT=${DB_PORT:-5432}
+            sanity_db
+            db_ready postgres
+            install_options="--database=pgsql --database-host=${DB_HOST} --database-name=${DB_NAME} --database-user=${DB_USER} --database-pass=${DB_PASS} --database-table-space=${DB_PREFIX} --database-port=${DB_PORT}"
+            ;;
+        *)
+            print_error "Unknown DB_TYPE Variable - Exiting"
+            exit 1
+            ;;
     esac
 }
 
@@ -83,16 +82,26 @@ nextcloud_configure_application_settings() {
         fi
     }
 
-    ngo /etc/nginx/nginx.conf NGINX_CLIENT_BODY_TIMEOUT client_body_timeout 300s
-    ngo /etc/nginx/nginx.conf NGINX_CLIENT_BODY_BUFFER_SIZE client_body_buffer_size 512k
-    ngo /etc/nginx/nginx.conf NGINX_FASTCGI_BUFFERS fastcgi_buffers "64 4k"
-    ngo /etc/nginx/nginx.conf NGINX_KEEP_ALIVE_TIMEOUT keepalive_timeout 600s
-    ngo /etc/nginx/nginx.conf NGINX_SEND_TIMEOUT send_timeout 600s
+    ngo /etc/nginx/server.conf.d/http/timeouts.conf NGINX_CLIENT_BODY_TIMEOUT client_body_timeout 300s
+    ngo /etc/nginx/server.conf.d/http/client.conf NGINX_CLIENT_BODY_BUFFER_SIZE client_body_buffer_size 512k
+    ngo /etc/nginx/server.conf.d/http/fastcgi_buffers.conf NGINX_FASTCGI_BUFFERS fastcgi_buffers "64 4k"
+    ngo /etc/nginx/server.conf.d/http/keepalive.conf NGINX_KEEP_ALIVE_TIMEOUT keepalive_timeout 600s
+    ngo /etc/nginx/server.conf.d/http/timeouts.conf NGINX_SEND_TIMEOUT send_timeout 600s
+
+    MIME_TYPES_FILE=/etc/nginx/server.conf.d/mime.types
+    if [ -f "${MIME_TYPES_FILE}" ]; then
+        if ! grep -Pq '^\s*application/javascript\s+mjs;' "${MIME_TYPES_FILE}"; then
+            lineno=$(grep -nP '^\s*application/javascript\b.*\bjs;' "${MIME_TYPES_FILE}" | head -n1 | cut -d: -f1)
+            if [ -n "${lineno}" ]; then
+                awk -v ln=${lineno} 'NR==ln{print; print "    application/javascript                           mjs;"; next} {print}' "${MIME_TYPES_FILE}" > "${MIME_TYPES_FILE}.tmp" && mv "${MIME_TYPES_FILE}.tmp" "${MIME_TYPES_FILE}"
+            fi
+        fi
+    fi
 
     if var_false "${CONTAINER_ENABLE_SCHEDULING}"; then
         silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT}"/occ background:ajax
     else
-        echo "*/${CRON_PERIOD} * * * * sudo -u ${NEXTCLOUD_USER} TZ=${TIMEZONE} php -d memory_limit=${PHP_MEMORY_LIMIT} -f ${NEXTCLOUD_WEBROOT}/cron.php >/dev/null 2>&1"  | silent tee /container/cron/nextcloud
+        echo "*/${CRON_PERIOD} * * * * sudo -u ${NEXTCLOUD_USER} TZ=${TIMEZONE} php -d memory_limit=${PHP_MEMORY_LIMIT} -f ${NEXTCLOUD_WEBROOT}/cron.php >/dev/null 2>&1"  | write_file /container/cron/nextcloud
         silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT}"/occ background:cron
     fi
 
@@ -143,25 +152,20 @@ nextcloud_configure_application_settings() {
         silent sudo --preserve-env=OC_PASS -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ user:resetpassword --password-from-env ${ADMIN_USER}
     fi
 
-    if var_true "${ENABLE_FILES_BACKEND}"; then
+    if var_true "${ENABLE_FILES_BACKEND}" && [ -n "${REDIS_HOST}" ]; then
         print_debug "Enabling Hi Performance Files Backend"
-        if var_true "${fbproceed}"; then
-            update_template \
-                                FILES_BACKEND_PROTOCOL \
-                                FILES_BACKEND_HOST \
-                                FILES_BACKEND_PORT \
-                            /etc/nginx/sites.available/files_backend.snippet
-        else
-            rm -rf /etc/services.available/30-nextcloud
-            sed -i "/include \/etc\/nginx\/sites.available\/files_backend.snippet;/d" /etc/nginx/sites.available/nextcloud.conf
-        fi
+        render_template \
+                        /container/data/nginx/sites.available/nextcloud/templates/files_backend.conf \
+                        /etc/nginx/sites.enabled/nextcloud/location/99-files_backend.conf \
+                            FILES_BACKEND_PROTOCOL \
+                            FILES_BACKEND_HOST \
+                            FILES_BACKEND_PORT
     else
         print_debug "Disabling Hi Performance Files Backend"
-        rm -rf /etc/services.available/30-nextcloud
-        sed -i "/include \/etc\/nginx\/sites.available\/files_backend.snippet;/d" /etc/nginx/sites.available/nextcloud.conf
+        rm -rf /container/run/available/30-nextcloud
     fi
 
-    cat <<EOF | silent tee -a /root/.bashrc
+    write_file -a /root/.bashrc <<EOF
 occ() {
       export oldpwd="\$(pwd)"
       cd ${NEXTCLOUD_WEBROOT}
@@ -184,7 +188,7 @@ nextcloud_configure_logging() {
 nextcloud_configure_fail2ban() {
     source /container/defaults/07-firewall
 	print_debug "Fail2Ban: Adding Jail - Nextcloud"
-	cat <<EOF | silent tee "${FAIL2BAN_CONFIG_PATH%/}"/jail.d/nextcloud.conf
+	write_file "${FAIL2BAN_CONFIG_PATH%/}"/jail.d/nextcloud.conf <<EOF
 [nextcloud]
 backend = auto
 enabled = true
@@ -205,7 +209,7 @@ nextcloud_configure_data_directories() {
                     ${CACHE_PATH},
                     ${LOG_PATH},\
                     ${SKELETON_PATH},\
-                    ${TMP_PATH},
+                    ${TEMP_PATH},
                     ${USERDATA_PATH}," \
                     "${NEXTCLOUD_USER}":"${NEXTCLOUD_GROUP}" 750
 
@@ -216,8 +220,37 @@ nextcloud_configure_data_directories() {
 
 nextcloud_create_configuration() {
     truefalse_onezero ENABLE_FILESYSTEM_CHECK_CHANGES
-    config_temp=$(/bin/mktemp)
-    sudo -u "${NEXTCLOUD_USER}" php <<EOF | silent tee "${config_temp}" && chown "${NEXTCLOUD_USER}":"${NEXTCLOUD_GROUP}" "${config_temp}" && mv "${config_temp}" "${CONFIG_FILE}"
+        config_temp=$(mktemp)
+
+        if var_true "${ENABLE_CACHE}" ; then
+            NEXTCLOUD_CACHE=""
+            NEXTCLOUD_CACHE=$(
+                if [ -n "${REDIS_HOST}" ]; then
+                    (
+cat <<EOPHP
+\$CONFIG['memcache.local'] = '\\OC\\Memcache\\APCu';
+\$CONFIG['memcache.distributed'] = '\\OC\\Memcache\\Redis';
+\$CONFIG['memcache.locking'] = '\\OC\\Memcache\\Redis';
+\$CONFIG['redis'] = array(
+    'host' => '${REDIS_HOST}',
+    'port' => ${REDIS_PORT},
+    'timeout' => 0.0,
+$( [ -n "${REDIS_PASS}" ] && echo "  'password' => '${REDIS_PASS}'," || true )
+    'dbindex' => ${REDIS_DB},
+);
+EOPHP
+                        )
+                else
+                        (
+cat <<EOPHP
+\$CONFIG['memcache.local'] = '\\OC\\Memcache\\APCu';
+EOPHP
+                        )
+                fi
+            )
+        fi
+
+        sudo -u "${NEXTCLOUD_USER}" php <<EOPHP | write_file "${config_temp}" && chown "${NEXTCLOUD_USER}":"${NEXTCLOUD_GROUP}" "${config_temp}" && mv "${config_temp}" "${CONFIG_FILE}"
 <?php
 include("${NEXTCLOUD_WEBROOT}/config/config.php");
 \$CONFIG['maintenance'] = false;
@@ -227,7 +260,7 @@ include("${NEXTCLOUD_WEBROOT}/config/config.php");
 \$CONFIG['auth.bruteforce.protection.enabled'] = ${ENABLE_BRUTEFORCE_PROTECTION};
 \$CONFIG['cache_chunk_gc_ttl'] = '${CACHE_CHUNK_GC_TTL}';
 \$CONFIG['cache_path'] = '${CACHE_PATH}';
-\$CONFIG['check_data_PATH_permissions'] = true;
+\$CONFIG['check_data_path_permissions'] = true;
 \$CONFIG['check_for_working_htaccess'] = false;
 \$CONFIG['check_for_working_wellknown_setup'] = ${ENABLE_CHECK_WELLKNOWN};
 \$CONFIG['cipher'] = '${CIPHER}';
@@ -297,13 +330,17 @@ include("${NEXTCLOUD_WEBROOT}/config/config.php");
 \$CONFIG['upgrade.disable-web'] = false;
 \$CONFIG['versions_retention_obligation'] = '${VERSIONS_RETENTION}';
 
+${NEXTCLOUD_CACHE}
+
 echo "<?php\n";
 echo "\\\$CONFIG = ";
 var_export(\$CONFIG);
 
 echo ";";
 ?>
-EOF
+EOPHP
+
+    chown "${NEXTCLOUD_USER}":"${NEXTCLOUD_GROUP}" "${CONFIG_FILE}"
 }
 
 nextcloud_install_application() {
@@ -311,7 +348,7 @@ nextcloud_install_application() {
     if [ -f "${USERDATA_PATH%/}/.version" ]; then
         installed_version=$(head -n 1 "${USERDATA_PATH%/}"/.version | awk '{print $1}')
     else
-        echo "${NEXTCLOUD_VERSION} migrated from existing install on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | silent tee -a "${USERDATA_PATH%/}"/.version
+        echo "${NEXTCLOUD_VERSION} migrated from existing install on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | write_file -a "${USERDATA_PATH%/}"/.version
     fi
 
     if version_greater "${installed_version}" "${NEXTCLOUD_VERSION}"; then
@@ -322,15 +359,15 @@ nextcloud_install_application() {
     if var_true "${ENABLE_AUTO_UPGRADE}"; then
         if version_greater "${NEXTCLOUD_VERSION}" "${installed_version}"; then
             if [ "${installed_version}" != "0.0.0~unknown" ]; then
-                silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ app:list | tee /tmp/nextcloud_applist_pre
+                silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ app:list | write_file /tmp/nextcloud_applist_pre
                 silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ upgrade
                 silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ db:add-missing-indices
-                silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ app:list  | tee /tmp/nextcloud_applist_post
+                silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ app:list  | write_file /tmp/nextcloud_applist_post
                 disabled_apps=$(diff <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_pre) <(sed -n "/Enabled:/,/Disabled:/p" /tmp/nextcloud_applist_post) | grep '<' | cut -d- -f2 | cut -d: -f1)
                 if [ -n "${disabled_apps}" ]; then
                     print_warn "The following apps have been disabled:"
                     echo "${disabled_apps}"
-                    echo "${disabled_apps}" | silent tee -a ${USERDATA_PATH%/}/.version
+                    echo "${disabled_apps}" | write_file -a ${USERDATA_PATH%/}/.version
                 fi
                 echo "${NEXTCLOUD_VERSION} automatically upgraded on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | cat - "${USERDATA_PATH%/}"/.version >/tmp/.version && mv /tmp/.version "${USERDATA_PATH%/}"/.version
                 rm -f /tmp/nextcloud_applist_{pre,post}
@@ -346,7 +383,7 @@ nextcloud_install_application() {
 
         instanceid=nc$(dd if=/dev/urandom bs=1 count=40 2>/dev/null | sha1sum | fold -w 10 | head -n 1)
 
-        cat <<EOF | silent tee "${CONFIG_FILE}"
+        write_file "${NEXTCLOUD_USER}" "${CONFIG_FILE}":644 <<EOF
 <?php
 \$CONFIG = array (
   'instanceid' => '$instanceid',
@@ -369,7 +406,6 @@ nextcloud_install_application() {
 EOF
 
         print_warn "Starting automatic configuration for Nextcloud version ${NEXTCLOUD_VERSION}"
-        #chown -R "${NEXTCLOUD_USER}":"${NEXTCLOUD_GROUP}" "${NEXTCLOUD_WEBROOT}"
         sudo -u "${NEXTCLOUD_USER}" touch "${NEXTCLOUD_WEBROOT}"/config/CAN_INSTALL
         silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT}"/occ maintenance:install \
                                                                                         -n -q \
@@ -378,10 +414,9 @@ EOF
                                                                                         --data-dir="${USERDATA_PATH}" \
                                                                                         ${install_options}
         rm -rf "${NEXTCLOUD_WEBROOT}"/config/CAN_INSTALL
-        #print_warn "Automatic configuration finished."
-        #chown -R "${NEXTCLOUD_USER}":"${NEXTCLOUD_GROUP}" "${NEXTCLOUD_WEBROOT}"/
+        print_notice "Automatic configuration finished."
         silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT}"/occ app:disable firstrunwizard
-        echo "${NEXTCLOUD_VERSION} first installed on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | silent tee -a "${USERDATA_PATH%/}"/.version
+        echo "${NEXTCLOUD_VERSION} first installed on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" | write_file -a "${USERDATA_PATH%/}"/.version
     fi
 }
 

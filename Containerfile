@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+# SPDX-FileCopyrightText: © 2026 Nfrastack <code@nfrastack.com>
 #
 # SPDX-License-Identifier: MIT
 
@@ -18,10 +18,10 @@ LABEL \
         org.opencontainers.image.licenses="MIT"
 
 ARG \
-    NEXTCLOUD_VERSION="33.0.0" \
-    NEXTCLOUD_FILES_BACKEND_VERSION="v1.3.0" \
+    NEXTCLOUD_VERSION="33.0.1" \
+    NEXTCLOUD_FILES_BACKEND_VERSION="v1.3.1" \
     NEXTCLOUD_FILES_BACKEND_REPO_URL="https://github.com/nextcloud/notify_push" \
-    DLIB_VERSION="v20.0" \
+    DLIB_VERSION="v20.0.1" \
     DLIB_REPO_URL="https://github.com/davisking/dlib" \
     PDLIB_VERSION="v1.1.0" \
     PDLIB_REPO_URL="https://github.com/goodspb/pdlib"
@@ -31,56 +31,59 @@ COPY LICENSE /usr/src/container/LICENSE
 COPY README.md /usr/src/container/README.md
 
 ENV \
-    NEXTCLOUD_USER=nginx \
-    NEXTCLOUD_GROUP=www-data \
-    CONTAINER_ENABLE_SCHEDULING=TRUE \
-    NGINX_SITE_ENABLED=nextcloud \
-    NGINX_WEBROOT="/www/nextcloud" \
-    NGINX_HEADER01_NAME="Referrer-Policy" \
-    NGINX_HEADER01_VALUE="no-referrer" \
-    NGINX_HEADER01_FLAG="always" \
-    NGINX_HEADER02_NAME="X-Content-Type-Options" \
-    NGINX_HEADER02_VALUE="nosniff" \
-    NGINX_HEADER02_FLAG="always" \
-    NGINX_HEADER03_NAME="X-Frame-Options" \
-    NGINX_HEADER03_VALUE="SAMEORIGIN" \
-    NGINX_HEADER03_FLAG="always" \
-    NGINX_HEADER04_NAME="X-Permitted-Cross-Domain-Policies" \
-    NGINX_HEADER04_VALUE="none" \
-    NGINX_HEADER04_FLAG="always" \
-    NGINX_HEADER05_NAME="X-Robots-Tag" \
-    NGINX_HEADER05_VALUE="noindex, nofollow" \
-    NGINX_HEADER05_FLAG="always" \
-    PHP_ENABLE_CREATE_SAMPLE_PHP=FALSE \
-    PHP_MODULE_ENABLE_BCMATH=TRUE \
-    PHP_MODULE_ENABLE_EXIF=TRUE \
-    PHP_MODULE_ENABLE_FILEINFO=TRUE \
-    PHP_MODULE_ENABLE_FTP=TRUE \
-    PHP_MODULE_ENABLE_GMP=TRUE \
-    PHP_MODULE_ENABLE_IMAGICK=TRUE \
-    PHP_MODULE_ENABLE_IGBINARY=TRUE \
-    PHP_MODULE_ENABLE_LDAP=TRUE \
-    PHP_MODULE_ENABLE_MSGPACK=TRUE \
-    PHP_MODULE_ENABLE_PCNTL=TRUE \
-    PHP_MODULE_ENABLE_PDLIB=TRUE \
-    PHP_MODULE_ENABLE_PDO=TRUE \
-    PHP_MODULE_ENABLE_PDO_SQLITE=TRUE \
-    PHP_MODULE_ENABLE_PDO_PGSQL=TRUE \
-    PHP_MODULE_ENABLE_POSIX=TRUE \
-    PHP_MODULE_ENABLE_PGSQL=TRUE \
-    PHP_MODULE_ENABLE_REDIS=TRUE \
-    PHP_MODULE_ENABLE_SIMPLEXML=TRUE \
-    PHP_MODULE_ENABLE_SODIUM=TRUE \
-    PHP_MODULE_ENABLE_SQLITE3=TRUE \
-    PHP_MODULE_ENABLE_SYSVSEM=TRUE \
-    PHP_MODULE_ENABLE_XMLWRITER=TRUE \
-    PHP_MODULE_ENABLE_ZIP=TRUE \
-    PHP_MEMORY_LIMIT="512M" \
-    PHP_TIMEOUT=600 \
     IMAGE_NAME="nfrastack/nextcloud" \
     IMAGE_REPO_URL="https://github.com/nfrastack/container-nextcloud/"
 
 RUN echo "" && \
+    BUILD_ENV=" \
+                30-nextcloud/NEXTCLOUD_USER=[env:NGINX_USER] \
+                30-nextcloud/NEXTCLOUD_GROUP=[env:NGINX_GROUP] \
+                10-nginx/NGINX_SITE_ENABLED=nextcloud \
+                10-nginx/NGINX_SITE_NEXTCLOUD_WEBROOT=/www/nextcloud \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER01_NAME='Referrer-Policy' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER01_VALUE='no-referrer' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER01_FLAG='always' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER02_NAME='X-Content-Type-Options' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER02_VALUE='nosniff' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER02_FLAG='always' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER03_NAME='X-Frame-Options' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER03_VALUE='SAMEORIGIN' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER03_FLAG='always' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER04_NAME='X-Permitted-Cross-Domain-Policies' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER04_VALUE='none' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER04_FLAG='always' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER05_NAME='X-Robots-Tag' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER05_VALUE='noindex, nofollow' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_HEADER05_FLAG='always' \
+                10-nginx/NGINX_SITE_NEXTCLOUD_INDEX_FILE='/index.php\$request_uri' \
+                20-php-fpm/PHP_CREATE_SAMPLE_PHP=FALSE \
+                20-php-fpm/PHP_MEMORY_LIMIT=512M \
+                20-php-fpm/PHP_MODULE_ENABLE_BCMATH=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_EXIF=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_FILEINFO=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_FTP=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_GMP=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_IMAGICK=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_IGBINARY=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_LDAP=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_MSGPACK=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_PCNTL=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_PDLIB=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_PDO=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_PDO_SQLITE=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_PDO_PGSQL=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_POSIX=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_PGSQL=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_REDIS=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_SIMPLEXML=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_SODIUM=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_SQLITE3=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_SYSVSEM=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_XMLWRITER=TRUE \
+                20-php-fpm/PHP_MODULE_ENABLE_ZIP=TRUE \
+                20-php-fpm/PHP_TIMEOUT=600 \
+              " \
+              && \
     DLIB_BUILD_DEPS_ALPINE=" \
                                 build-base \
                                 cmake \
@@ -165,20 +168,18 @@ RUN echo "" && \
     echo "extension=pdlib" > "$(php-ext info modules_path)"/pdlib.ini && \
     echo ";priority=20" >> "$(php-ext info modules_path)"/pdlib.ini && \
     container_build_log add "Pdlib" "${PDLIB_VERSION}" "${PDLIB_REPO_URL}" && \
-    \
     php-ext prepare && \
     php-ext reset && \
     php-ext enable core && \
-    \
-    mkdir -p /container/data/nextcloud/install/custom-apps && \
     if [[ "${NEXTCLOUD_VERSION}" =~ beta|pre|rc ]]; then \
         nrp=prer ; \
     else \
         nrp=r ; \
     fi ; \
+    mkdir -p /container/data/nextcloud/install/custom-apps && \
     curl -sSL https://download.nextcloud.com/server/${nrp}eleases/nextcloud-${NEXTCLOUD_VERSION}.tar.bz2 | tar xvfj - --strip 1 -C /container/data/nextcloud/install && \
     chown -R "${NGINX_USER}":"${NGINX_GROUP}" /container/data/nextcloud/install && \
-    container_build_log add "Nextcloud" "${NEXTCLOUD_VERSION}" "${NEXTCLOUD_REPO_URL}" && \
+    container_build_log add "Nextcloud" "${NEXTCLOUD_VERSION}" "download.nextcloud.com" && \
     \
     mkdir -p /opt/notify_push/bin/ && \
     chown -R "${NGINX_USER}":"${NGINX_GROUP}" /opt/notify_push && \

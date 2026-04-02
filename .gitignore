@@ -1,3 +1,4 @@
 /build-assets/*
 !/build-assets/.empty
-
+/examples/*
+!/examples/compose.yml
