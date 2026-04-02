@@ -104,10 +104,10 @@ nextcloud_configure_application_settings() {
         echo "*/${CRON_PERIOD} * * * * sudo -u ${NEXTCLOUD_USER} TZ=${TIMEZONE} php -d memory_limit=${PHP_MEMORY_LIMIT} -f ${NEXTCLOUD_WEBROOT}/cron.php >/dev/null 2>&1"  | write_file /container/cron/nextcloud
         silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT}"/occ background:cron
         if var_true "${ENABLE_MAINTENANCE_WINDOW}" ; then
-           silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ occ config:system:set maintenance_window_start --value="${MAINTENANCE_WINDOW_START_HOUR}" --type=integer
+           silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ config:system:set maintenance_window_start --value="${MAINTENANCE_WINDOW_START_HOUR}" --type=integer
         else
             print_debug "Disabling Maintenance Window"
-            silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ occ config:system:set maintenance_window_start --value="100" --type=integer
+            silent sudo -u "${NEXTCLOUD_USER}" php "${NEXTCLOUD_WEBROOT%/}"/occ config:system:set maintenance_window_start --value="100" --type=integer
         fi
     fi
 

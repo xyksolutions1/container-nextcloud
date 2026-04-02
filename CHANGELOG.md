@@ -1,3 +1,9 @@
+## 33-3.7.2 2026-04-02 <code at nfastack dot com>
+
+   ### Changed
+      - Fix maintenance window activation
+
+
 ## 33-3.7.1 2026-04-02 <code at nfastack dot com>
 
    ### Added
