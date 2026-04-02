@@ -81,6 +81,8 @@ RUN echo "" && \
                 20-php-fpm/PHP_MODULE_ENABLE_SYSVSEM=TRUE \
                 20-php-fpm/PHP_MODULE_ENABLE_XMLWRITER=TRUE \
                 20-php-fpm/PHP_MODULE_ENABLE_ZIP=TRUE \
+                20-php-fpm/PHP_MODULE_OPCACHE_INTERNED_STRINGS_BUFFER=16 \
+                20-php-fpm/PHP_MODULE_OPCACHE_MEM_SIZE=256M \
                 20-php-fpm/PHP_TIMEOUT=600 \
               " \
               && \
