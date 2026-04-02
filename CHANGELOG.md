@@ -1,3 +1,14 @@
+## 33-3.7.1 2026-04-02 <code at nfastack dot com>
+
+   ### Added
+      - Add Maintenance Window Support
+      - Add SERVER_ID support
+
+   ### Changed
+      - Update optimized defaults for opcache
+      - Cleanup warnings in administrastion console with nginx configuration
+
+
 ## 33-3.7.0 2026-04-01 <code at nfastack dot com>
 
    ### Added
