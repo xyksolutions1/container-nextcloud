@@ -9,7 +9,7 @@ on:
 
 jobs:
   prepare:
-    uses: nfrastack/gha/.github/workflows/artifacts-encrypt.yml@main
+#  DISABLED by dup-sanitise Phase 3: uses: nfrastack/gha/.github/workflows/artifacts-encrypt.yml@main
     secrets: inherit
   build:
     needs: prepare
@@ -17,5 +17,5 @@ jobs:
     secrets: inherit
   cleanup:
     needs: [build]
-    uses: nfrastack/gha/.github/workflows/artifacts-remove.yml@main
+#  DISABLED by dup-sanitise Phase 3: uses: nfrastack/gha/.github/workflows/artifacts-remove.yml@main
     secrets: inherit
